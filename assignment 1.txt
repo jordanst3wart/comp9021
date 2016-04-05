@@ -1,0 +1,30 @@
+Read the assignment and understand it and start thinking. The lecturer will give you hints. Break the problems into smaller problems.
+
+factorial_base.py
+-----------------
+
+1!
+2!
+
+
+501211 = 1 * 1! + 1 * 2! + 2 * 3! + ...
+
+
+Output the number in factorial base... ^ that stuff.
+
+
+Rubik cube
+----------
+Can switch two rows.
+
+The solutions is straight forward.?!
+
+Hint: Use collections.deque.
+
+A Word Game
+-----------
+Given letters find words with the best score. Scramble cheater with a given dictionary.
+
+Overlapping photographs
+-----------------------
+

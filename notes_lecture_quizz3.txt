@@ -1,0 +1,51 @@
+States are q_i
+
+q0
+q1
+q2
+
+deterministic
+
+0 is a empty something
+
+
+regular exp
+We have 11 then either 00 or 11 either 0 or more times.
+11(00|11)*
+
+In more cases:
+(11(00|11)*0)*11(00|11)*
+
+
+First part:
+(11(00|11)*0)*
+
+Second part:
+11(00|11)*
+
+
+Context Variables (apparently more powerful than regex??)v
+- 1100011
+- 1111
+- 10101
+- 1010 (apparently regex can't handle this one??)
+
+Apparently it is like a variable in the 110011 stream of values.
+
+S - > T | a
+T - > U | T
+U - > elipson
+
+Create a dictionary with symbols. Allow the symbols to progress to each other.
+
+Look what you can regenerate from particular values.
+
+What each thing can regenerate
+a S b T
+
+
+aSBTc
+abTc
+abc
+aSbc
+

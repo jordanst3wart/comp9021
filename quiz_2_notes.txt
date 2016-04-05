@@ -1,0 +1,58 @@
+Encoding data using bits. Which is apparently an important technique.
+
+Encoding example:
+21 = 16 + 4 + 1
+= 10101
+->{0,2,4} or 2^0 + 2^2 + 2^4
+
+
+6 = 
+
+
+5 = 
+= 101
+{0,2}
+
+If everything is seem is will be:
+{0,1,2,3,4,5,6,7,8,9} which is 2^10-1
+
+
+37 
+
+41 % 10 = 1
+1 << 1 (push to the left once)
+& should be zero of the two numbers
+add the number with "or" ||
+
+41 // 10 = 4
+
+
+encode(23) 
+bin(831)
+
+
+encode(23, 6)
+106416
+bin(106416)
+0b110011111...
+int('34') -> 34
+int('10101', 2) -> 37 convert in bins to decimal
+
+
+
+
+def encode(*integers)
+	return int('0'.join(''.join(c+C for c in bin(i)[2: ]) for i in integers), 2)
+
+0 is the separator
+bin(37[2: ] is the 
+
+
+print(c + c) join to numbers together eg. '11' or '00'
+
+My number in base 2 with the first 2 characters separated 
+
+Task is to de-code the the encoding
+-----------------------------------
+scan the string and 
+
