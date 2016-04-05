@@ -1,7 +1,7 @@
 #Prompts the user to input the digits 1 to 8 (with possibly whitespace inserted anywhere),
 #  in some order, say d1 d2 d3 d4 d5 d6 d7 d8, without repetition;
 #  if the input is incorrect, then the program outputs an error message and exits.
-
+# by Jordan Stewart, z3291315
 
 import sys
 import re
