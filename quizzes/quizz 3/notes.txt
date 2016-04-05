@@ -1,0 +1,14 @@
+Last 10 minutes he started talking about the quizz.
+
+f(a)
+
+Function symbol that takes some number of algorithms.
+
+
+arity 3
+inputs have 3 inputs.
+
+
+Simplify the string. Thing about making the string simplier. something(another thing, other thing) replace them with re.
+
+It should have arity number of children.

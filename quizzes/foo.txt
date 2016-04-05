@@ -1,0 +1,50 @@
+1.  arity = 0
+    term =
+    answer = correct
+2.  arity = 3
+    term = constant
+    answer = incorrect
+3.  arity = 1
+    function_of_arity_one(hello)
+    answer = correct
+4.  arity = 0
+    function_of_arity_one(hello)
+    answer = incorrect
+5.  arity = 2
+    term = F(g(a,a), f(a,b))
+    answer = correct
+6.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+7.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+8.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+9.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+10.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+11.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+12.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+13.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+14.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+15.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+16.  arity = 3
+    term = f(g(a,a), f(a,b))
+    answer = incorrect
+
+
