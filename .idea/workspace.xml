@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="20e2a010-eedd-4297-a9f9-ac9cc7f9ca3b" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/vcs.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Assignment_1/rubiks_rectangle.py" afterPath="$PROJECT_DIR$/Assignment_1/rubiks_rectangle.py" />
     </list>
     <ignored path="comp9021.iws" />
@@ -40,8 +40,8 @@
       <file leaf-file-name="rubiks_rectangle.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/Assignment_1/rubiks_rectangle.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.22058824">
-              <caret line="7" column="11" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
+            <state vertical-scroll-proportion="0.3697479">
+              <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
               <folding>
                 <element signature="e#272#282#0" expanded="true" />
               </folding>
@@ -874,8 +874,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/Assignment_1/rubiks_rectangle.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.22058824">
-          <caret line="7" column="11" selection-start-line="7" selection-start-column="11" selection-end-line="7" selection-end-column="11" />
+        <state vertical-scroll-proportion="0.3697479">
+          <caret line="65" column="0" selection-start-line="65" selection-start-column="0" selection-end-line="65" selection-end-column="0" />
           <folding>
             <element signature="e#272#282#0" expanded="true" />
           </folding>

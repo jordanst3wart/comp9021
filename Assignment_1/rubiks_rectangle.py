@@ -7,28 +7,21 @@ import sys
 import re
 import math
 
-# three operations max steps is 18
-# list = ['1','2','3','4','5','6','7','8']
+
 def calculate_number_of_steps(rectangle):
     step = 0
-    patterns = [['1','2','3','4','5','6','7','8',step]]
-    # pattern.append(['1','2','3','4','5','6','7','8']) # or pattern.append(pattern[i])
-    # if (patterns[i] == rectangle):   # check for each pattern
-    #    return steps
-    # for each pattern maybe
+    step_position = 8
+    patterns = [['1','2','3','4','5','6','7','8', step]]
     while True:
         pattern=patterns[0]
         print(pattern)
-        # check pattern match
-        if ( match_pattern(pattern, rectangle) ):   # check for each pattern
-            return pattern[8]
+        if ( match_pattern(pattern, rectangle) ):
+            return pattern[step_position]
         else:
-            # spawn three combinations of patterns
+            # spawn three permutations each pattern
             patterns.append(right_shift(pattern))
             patterns.append(middle_clockwise_rotation(pattern))
-            # i should remove the tested pattern at the end
             del patterns[0]
-            # print('Number of patterns: ',len(patterns), 'step: ', steps, 'guess :', guess)
 
 
 def match_pattern(pattern, rectangle):
@@ -68,7 +61,6 @@ def middle_clockwise_rotation(pattern):
 
 
 def add_step(pattern):
-    # print(pattern)
     pattern[8] += 1
     return pattern
 
