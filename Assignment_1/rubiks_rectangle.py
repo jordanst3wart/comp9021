@@ -69,6 +69,7 @@ try:
     line = input('Input final configuration : ')
     line = re.sub('\s+', '', line) # remove possible whitespace
     line = list(line)   # make into a list of characters
+    # TODO I should check if the values input are numbers
     if len(line)!=8:
         raise ValueError
 except ValueError:

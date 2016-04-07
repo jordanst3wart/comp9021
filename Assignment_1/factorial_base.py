@@ -58,7 +58,7 @@ value = 0
 (blah, value) = base_factorial(term,value)
 # for zero factorial case :)
 if term == 0:
-    value = 1
+    value = 0
 
 print('Decimal ',term,' reads as ',value,' in factorial base.')
 
