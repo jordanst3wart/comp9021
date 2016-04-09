@@ -5,6 +5,8 @@
 
 import re
 import sys
+import itertools
+import math
 
 # build off each letter
 # match word in attached text file
@@ -15,58 +17,75 @@ import sys
 def read_file():
     file_name = "wordsEn.txt"
     with open(file_name, "r") as file:      # just read
-        content = file.readlines()          # from http://stackoverflow.com/questions/3277503/python-read-file-line-by-line-into-array
+        content = file.read().splitlines() # readlines()          # from http://stackoverflow.com/questions/3277503/python-read-file-line-by-line-into-array
     file.close()                            # close the file
     return content
 
 
-def find_highest_scoring_words(line,file_data):
-    best_words = []           # no words found
-    score = 0
+# creates a dictionary with unique letter combinations being the key
+def create_dict():
+    content = read_file()
+    dict_of_words = dict()
+    for word in content:
+        letters=list(word)
+        letters.sort()
+        letters = ''.join(letters) # concat letters to string
+        if letters in dict_of_words.keys():
+            dict_of_words[letters].append(word)
+        else:
+            dict_of_words[letters] = [word]
+    #print('Lines in file: ',len(content), 'dictionary items: ', len(dict_of_words))
+    return dict_of_words
+
+
+def find_highest_scoring_words(line, list_of_words):
     letters = list(line)
     letters = sorted(letters)
-    # loop start here, finish when all letter combos check
-
     # create letter combination in alphabertical order
-    # TODO I actually need to write this.
-    words = create_word_combos(letters)
-
-    # for each word
-    # check if word is in the file_data
-    for word in words:
-        # TODO I actually need to write this aswell.
-        if is_word(word,file_data):
-            temp = score_word(word)      # score word
-            if temp >= score:            # I should make this if statement better
-                score = temp                # if score higher save word and score as new high score
-                best_words.append(word)
-
-    return [best_words, score]
+    # if not enough memory I could create words of different lengths
+    combinations = create_word_combos(letters)         # letters! number of words created
+    words = is_word(combinations, list_of_words)
+    [words, score] = sort_words(words)
+    return [words, score]
 
 
 # letters are sorted
-def create_word_combo(letters):
-    word_combos = ["word1","word2"]  # in alphabert
+# max length of combos is n! if duplicates included
+# iterates for lengths of words and creates combinations, no duplicate letter combinations
+def create_word_combos(letters):
+    word_combos = []
+    for L in range(1, len(letters)+1):
+        for subset in itertools.combinations(letters, L):
+            subset = ''.join(subset) # concat letters to string
+            word_combos.append(subset)
+    word_combos=set(word_combos) # removes duplicates with shared letters ie. aaa returns 'a', 'aa', 'aaa' rather than 'a', 'aa', 'aa' etc
+    # print("max combos: ", math.factorial(len(letters)),"actual combos: ", len(word_combos))
     return word_combos
 
 
+# checks if words are in the list_of_words
+def is_word(combinations,list_of_words):
+    new_list_of_words = []
+    for combo in combinations:
+        if combo in list_of_words:
+            new_list_of_words.append(combo)
+
+    return new_list_of_words
 
 
-def is_word(word,file_data):
-    return True
+def sort_words(words):
+    highest_score = 0
+    new_list = []
+    for word in words:
+        score = score_word(word)
+        if score > highest_score:
+            highest_score = score
+            new_list = []
+            new_list.append(word)
+        elif score == highest_score:
+            new_list.append(word)
 
-
-
-# might need refactoring
-# return true if word is matched with the letters
-def match_word_from_letters(letters, word):
-    list_word = list(word)
-    return compare(letters,list_word)
-
-
-# compare to lists. Thanks stack http://stackoverflow.com/questions/7828867/how-to-efficiently-compare-two-unordered-lists-not-sets-in-python
-def compare(list1, list2):
-    return sorted(list1) == sorted(list2)
+    return [new_list, highest_score]
 
 
 # given word return score
@@ -74,8 +93,9 @@ def score_word(word):
     score = 0
     # dictionary values
     values = {'a': 2, 'b': 5,'c':4,'d':4,'e':1,'f':6,
-       'g':5, 'h':5, 'i':1, 'j':7, 'k':6, 'l':3,
-       's':1, 't':2, 'u':4, 'v':6, 'w':6, 'x':7,
+        'g':5, 'h':5, 'i':1, 'j':7, 'k':6, 'l':3,
+        'm': 5,'n':2,'o':3,'p':5,'q':7,'r':2,
+        's':1, 't':2, 'u':4, 'v':6, 'w':6, 'x':7,
         'y':5, 'z':7}
     word_list=list(word)
     for letter in word_list:
@@ -119,11 +139,9 @@ except ValueError:
 #value = calculate_number_of_steps(line)
 #print(value, 'steps are needed to reach the final configuration.')
 
-file_data = read_file()
-[words, score] = find_highest_scoring_words(line, file_data)
-message_function(words,score)
+#dict_of_words = read_file()
+dict_of_words = create_dict()
 
-
-
-
+#[words, score] = find_highest_scoring_words(line, dict_of_words)
+#message_function(words,score)
 

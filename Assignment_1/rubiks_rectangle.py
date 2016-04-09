@@ -79,3 +79,9 @@ except ValueError:
 value = calculate_number_of_steps(line)
 print(value, 'steps are needed to reach the final configuration.')
 # collections.deque nah
+
+# check if a letter is added
+#try:
+#   val = int(userInput)
+#except ValueError:
+#   print("That's not an int!")
