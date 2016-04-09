@@ -17,7 +17,7 @@ import math
 def read_file():
     file_name = "wordsEn.txt"
     with open(file_name, "r") as file:      # just read
-        content = file.read().splitlines() # readlines()          # from http://stackoverflow.com/questions/3277503/python-read-file-line-by-line-into-array
+        content = file.read().splitlines()  # from http://stackoverflow.com/questions/3277503/python-read-file-line-by-line-into-array
     file.close()                            # close the file
     return content
 
@@ -38,15 +38,15 @@ def create_dict():
     return dict_of_words
 
 
-def find_highest_scoring_words(line, list_of_words):
+def find_highest_scoring_words(line, dict_of_words):
     letters = list(line)
     letters = sorted(letters)
     # create letter combination in alphabertical order
     # if not enough memory I could create words of different lengths
     combinations = create_word_combos(letters)         # letters! number of words created
-    words = is_word(combinations, list_of_words)
-    [words, score] = sort_words(words)
-    return [words, score]
+    list_of_list_of_words = find_words(combinations, dict_of_words)
+    [list_of_list_of_words, score] = sort_words(list_of_list_of_words)
+    return [list_of_list_of_words, score]
 
 
 # letters are sorted
@@ -56,36 +56,46 @@ def create_word_combos(letters):
     word_combos = []
     for L in range(1, len(letters)+1):
         for subset in itertools.combinations(letters, L):
-            subset = ''.join(subset) # concat letters to string
+            subset = list(subset)                # change from tuple to list
+            subset.sort()               # sorts the letters in alphabetical order
+            subset = ''.join(subset)    # concat letters to string
             word_combos.append(subset)
     word_combos=set(word_combos) # removes duplicates with shared letters ie. aaa returns 'a', 'aa', 'aaa' rather than 'a', 'aa', 'aa' etc
     # print("max combos: ", math.factorial(len(letters)),"actual combos: ", len(word_combos))
     return word_combos
 
 
-# checks if words are in the list_of_words
-def is_word(combinations,list_of_words):
+# checks if letters are in the dict_of_words
+def find_words(combinations, dict_of_words):
     new_list_of_words = []
     for combo in combinations:
-        if combo in list_of_words:
-            new_list_of_words.append(combo)
-
+        if combo in dict_of_words:
+            new_list_of_words.append(dict_of_words[combo])
     return new_list_of_words
 
 
-def sort_words(words):
+# all the words in the list now have the same score unless there is two lists
+# finds the list with the highest score
+def sort_words(list_of_list_of_words):
     highest_score = 0
     new_list = []
-    for word in words:
-        score = score_word(word)
+    for list_of_words in list_of_list_of_words:
+        score = score_word(list_of_words[0])
         if score > highest_score:
             highest_score = score
             new_list = []
-            new_list.append(word)
+            new_list.append(list_of_words)
         elif score == highest_score:
-            new_list.append(word)
+            new_list.append(list_of_words)
 
-    return [new_list, highest_score]
+    # flattening the list
+    flattened = []
+    if any(isinstance(el, list) for el in new_list):
+        for sublist in new_list:
+            for val in sublist:
+                flattened.append(val)
+
+    return [flattened, highest_score]
 
 
 # given word return score
@@ -108,11 +118,17 @@ def message_function(words, score):
     if len(words) == 0:
         print("No word is built from some of those letters.")
     elif len(words) == 1:
-        print("The highest score is ", score,".")
-        print("The highest scoring word is ", words[0])
+        #print(score,".")
+        sys.stdout.write("The highest score is ")
+        sys.stdout.write(str(score))
+        sys.stdout.write(".\n") # to remove that annoying space
+        print("The highest scoring word is", words[0])
     else:
         # if multiple
         # for each word print
+        sys.stdout.write("The highest score is ")
+        sys.stdout.write(str(score))
+        sys.stdout.write(".\n") # to remove that annoying space
         print("The highest scoring words are, in alphabetical order: ")
         print_multiple_words(words)
 
@@ -132,6 +148,9 @@ try:
     # TODO raise error for numbers or weird stuff in input. Make sure it is a char.
     if len(line) < 3 or len(line) > 10:
         raise ValueError
+    for letter in line:
+        if not(letter.isalpha()):
+            raise ValueError
 except ValueError:
     print('Incorrect input, giving up...')
     sys.exit()
@@ -142,6 +161,7 @@ except ValueError:
 #dict_of_words = read_file()
 dict_of_words = create_dict()
 
-#[words, score] = find_highest_scoring_words(line, dict_of_words)
-#message_function(words,score)
+[words, score] = find_highest_scoring_words(line, dict_of_words)
+words=sorted(words)
+message_function(words,score)
 
