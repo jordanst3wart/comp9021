@@ -7,7 +7,7 @@ import sys
 import re
 import math
 
-
+# TODO add
 def calculate_number_of_steps(rectangle):
     step = 0
     step_position = 8
@@ -21,6 +21,7 @@ def calculate_number_of_steps(rectangle):
             # spawn three permutations each pattern
             patterns.append(right_shift(pattern))
             patterns.append(middle_clockwise_rotation(pattern))
+            patterns.append(row_exchange(pattern))
             del patterns[0]
 
 
@@ -72,13 +73,17 @@ try:
     # TODO I should check if the values input are numbers
     if len(line)!=8:
         raise ValueError
+    for i in line:
+        int(i)      # gives up if not an int
+    if not(''.join(sorted(line)) == '12345678'):
+        raise ValueError
 except ValueError:
     print('Incorrect input, giving up...')
     sys.exit()
 
+#value = calculate_number_of_steps_deque(line)
 value = calculate_number_of_steps(line)
 print(value, 'steps are needed to reach the final configuration.')
-# collections.deque nah
 
 # check if a letter is added
 #try:
