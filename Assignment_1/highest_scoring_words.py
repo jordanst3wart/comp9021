@@ -137,7 +137,7 @@ def message_function(words, score):
 def print_multiple_words(words):
     # sort to be in alphabert
     for word in words:
-        print(word)
+        print('    ',word)
 
 
 # import text file document with try

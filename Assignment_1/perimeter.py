@@ -75,7 +75,7 @@ def initialise_map(points):
 # print rectangle onto map by making map have 1s on it
 def print_rectangles_on_map(points, map, min_x, min_y):
     buffer = 10
-    print_points_scaled(points,min_x,min_y,buffer)
+    #print_points_scaled(points,min_x,min_y,buffer)
     for point in points:
         xloc = range(point.x1-min_x+buffer,point.x2-min_x+buffer)
         yloc = range(point.y1-min_y+buffer,point.y2-min_y+buffer)
@@ -86,57 +86,70 @@ def print_rectangles_on_map(points, map, min_x, min_y):
 
 
 def find_perimeter(map):
-    [map, perimeterV] = get_vertical_lines(map)
-    [map, perimeterH] = get_horizontal_lines(map)
-    perimeter = perimeterV + perimeterH
-    return [perimeter, map]
+    map = get_vertical_lines(map)
+    map = get_horizontal_lines(map)
+    return map
 
 
 # got through two lines at a time
 # change number to 2
 def get_vertical_lines(map):
-    x = 0
-    y = 0
-    perimeter = 0
+    x = 1
+    y = 1
     while x + 1 < len(map[0]):
         while y < len(map):
             if map[y][x] != map[y][x+1]:
                 if map[y][x] == 1 or map[y][x] == 2:
                     map[y][x] = 2
-                    # add perimeter
-                    perimeter += 1
                 elif map[y][x+1] == 1 or map[y][x+1] == 2:
                     map[y][x+1] = 2
-                    # add perimeter
-                    perimeter += 1
-
             y += 1
         y = 0
         x += 1
-    return [map, perimeter]
+    return map
 
 
 # got through two lines at a time
 # change number to 2
 def get_horizontal_lines(map):
-    x = 0
-    y = 0
-    perimeter = 0
+    x = 1
+    y = 1
     while y + 1 < len(map):
         while x < len(map[0]):
-            if map[y][x] != map[y+1][x]:
+            # finding internal corners
+            if (map[y][x]==1) and (map[y+1][x]==2 or map[y-1][x]==2) and (map[y-1][x-1]==0 or map[y-1][x+1]==0 or map[y+1][x+1]==0 or map[y+1][x-1]==0):
+                map[y][x]=4
+            # finding external corners
+            elif(map[y][x]==2) and (map[y+1][x]==2 or map[y-1][x]==2) and (map[y+1][x]==0 or map[y-1][x]==0):
+                map[y][x]=3
+            elif map[y][x] != map[y+1][x]:
                 if map[y][x] == 1 or map[y][x] == 2:
-                    # map[y][x] = 2
-                    # add perimeter
-                    perimeter += 1
+                    map[y][x] = 2
                 elif map[y+1][x] == 1 or map[y+1][x] == 2:
-                    # map[y+1][x] = 2
-                    # add perimeter
-                    perimeter += 1
+                    map[y+1][x] = 2
             x += 1
         x = 0
         y += 1
-    return [map, perimeter]
+    return map
+
+
+# and counts 3s
+def count_per(map):
+    number__2s = 0
+    number__3s = 0
+    y = 0
+    x = 0
+    while y < len(map):
+        while x < len(map[0]):
+            if map[y][x] == 2:
+                number__2s += 1
+            elif map[y][x] == 3:
+                number__3s += 2
+            x += 1
+        x = 0
+        y += 1
+    #print("2s: ",number__2s,"3s: ",number__3s)
+    return (number__2s + number__3s)
 
 
 def print_points(points):
@@ -157,8 +170,8 @@ def print_map(map):
 
 
 # input is like file.txt
-#text_file = input('Which data file do you want to use? ')
-text_file="frames_1.txt" # TODO change me
+text_file = input('Which data file do you want to use? ')
+
 f = open(text_file)
 lines = f.readlines()
 points = []
@@ -179,12 +192,14 @@ f.close()
 # input to map
 map = print_rectangles_on_map(points, map, min_x, min_y)
 # find lines on map
-[perimeter, map] = find_perimeter(map)
-print(perimeter)
-print_map(map)
+map = find_perimeter(map)
+
 # calculate perimeter
 # perimeter = calculate_perimeter(lines)
+perimeter = count_per(map)
+#print("number of 2s: ", number_of_2s)
+#print_map(map)
 
 # print_map(map)
 
-# print("The perimeter is:", perimeter)
+print("The perimeter is:", perimeter)
