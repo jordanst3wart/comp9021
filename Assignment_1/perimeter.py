@@ -66,48 +66,77 @@ def initialise_map(points):
     buffer = 10
     [max_x1, max_y1, max_x2, max_y2] = max_points(points)
     [min_x1, min_y1, min_x2, min_y2] = min_points(points)
-    map = [[0 for x in range(min_x1, max_x2)] for y in range(min_y1, max_y2)]
+    map = [[0 for x in range(min_x1-buffer, max_x2+buffer)] for y in range(min_y1-buffer, max_y2+buffer)]
     return [map, min_x1, min_y1]
 
 
-# min_x and min_y are the origin
+# min_x-buffer and min_y-buffer are the origin
 # prints all the rectangles onto the map
+# print rectangle onto map by making map have 1s on it
 def print_rectangles_on_map(points, map, min_x, min_y):
     buffer = 10
     print_points_scaled(points,min_x,min_y,buffer)
-    # print rectangle onto map by making map have 1s on it
     for point in points:
-        #xloc = range(point.x1,point.x2)
-        #yloc = range(point.y1,point.y2)
-        #xloc = range(point.x1+buffer+min_x,point.x2+buffer+min_x)
-        #yloc = range(point.y1+buffer+min_y,point.y2+buffer+min_y)
-        #map = [[1 for x in xloc] for y in yloc]
-        #map = [[1 for x in xloc] for y in yloc]
-        #print(xloc, yloc)   # not scaled
-        #print("=====================")
-                            # scaled
-        xloc = range(point.x1-min_x,point.x2-min_x)
-        yloc = range(point.y1-min_y,point.y2-min_y)
-        print(xloc, yloc)   # not scaled
-
+        xloc = range(point.x1-min_x+buffer,point.x2-min_x+buffer)
+        yloc = range(point.y1-min_y+buffer,point.y2-min_y+buffer)
         for x in xloc:
             for y in yloc:
                 map[y][x]=1
-        # find min and max points something like the initialise map function
-        #for x in range(point.x1, point.x2):
-        #    for y in range(point.y1, point.y2):
-        #        pass
-                # map[x + point.x1 - min_x + buffer ][ y + point.y1 - min_y + buffer]=1
-                # print("x is: ",point.x1 - min_x + buffer, "y is: ",point.y1 - min_y + buffer)
-        #print("x: ",point.x1,"y: ",point.y1)
-    #print_points(points)
-
-    # map[[1 for x in range(point.x1, point.x2)] for y in range(point.y1, point.y2)]
     return map
 
 
 def find_perimeter(map):
-    pass
+    [map, perimeterV] = get_vertical_lines(map)
+    [map, perimeterH] = get_horizontal_lines(map)
+    perimeter = perimeterV + perimeterH
+    return [perimeter, map]
+
+
+# got through two lines at a time
+# change number to 2
+def get_vertical_lines(map):
+    x = 0
+    y = 0
+    perimeter = 0
+    while x + 1 < len(map[0]):
+        while y < len(map):
+            if map[y][x] != map[y][x+1]:
+                if map[y][x] == 1 or map[y][x] == 2:
+                    map[y][x] = 2
+                    # add perimeter
+                    perimeter += 1
+                elif map[y][x+1] == 1 or map[y][x+1] == 2:
+                    map[y][x+1] = 2
+                    # add perimeter
+                    perimeter += 1
+
+            y += 1
+        y = 0
+        x += 1
+    return [map, perimeter]
+
+
+# got through two lines at a time
+# change number to 2
+def get_horizontal_lines(map):
+    x = 0
+    y = 0
+    perimeter = 0
+    while y + 1 < len(map):
+        while x < len(map[0]):
+            if map[y][x] != map[y+1][x]:
+                if map[y][x] == 1 or map[y][x] == 2:
+                    # map[y][x] = 2
+                    # add perimeter
+                    perimeter += 1
+                elif map[y+1][x] == 1 or map[y+1][x] == 2:
+                    # map[y+1][x] = 2
+                    # add perimeter
+                    perimeter += 1
+            x += 1
+        x = 0
+        y += 1
+    return [map, perimeter]
 
 
 def print_points(points):
@@ -144,29 +173,18 @@ except ValueError:
     sys.exit()
 
 f.close()
-# [print(point.x1, point.y1, point.x2, point.y2) for point in points]
 
-
-# points[1 .. n].x1 x2 y1 y2
 # initialise map
 [map, min_x, min_y] = initialise_map(points)
 # input to map
-print("x length: ", len(map[0])," y length: ", len(map)) # print x and y length
-#print_map(map)
-
 map = print_rectangles_on_map(points, map, min_x, min_y)
 # find lines on map
+[perimeter, map] = find_perimeter(map)
+print(perimeter)
 print_map(map)
-# something like:
-#print('\n'.join([''.join(['{:map[0]}'.format(item) for item in row])
-#      for row in map]))
-# http://stackoverflow.com/questions/17870612/printing-a-two-dimensional-array-in-python
-# lines = find_perimeter(map)
 # calculate perimeter
 # perimeter = calculate_perimeter(lines)
 
-
-
-# print(list_of_rectangles)
+# print_map(map)
 
 # print("The perimeter is:", perimeter)
