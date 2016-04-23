@@ -1,0 +1,9 @@
+example in ration_number.py
+
+Testing each function with weird comments
+
+Disadvantage is that it used a lot of comments.
+
+I would rather have a call like:
+
+Python3 fun.py test_me
