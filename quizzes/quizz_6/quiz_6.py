@@ -15,7 +15,7 @@ import math
 
 
 class Point:
-    def __init__(self, x = 0, y = 0):
+    def __init__(self, x=0, y=0):
         self.x = x
         self.y = y
 
@@ -42,25 +42,28 @@ class Point:
         _y = min(point.y,self.y)+y_distance
         return Point(_x,_y)
 
-    # breaks encapsulation but...
-    def give_string(self):
-        #string_format = 'Point({:.2f}, {:.2f})'.format(self.x, self.y)
-        #string = eval(string_format)
-        return [self.x,self.y]
-
-
 
 # possibly a sub class of point
 # takes the import of center and point
+# positional arguements are all the arguements in the different positions
+#
 class Disk(Point):
-    def __init__(self, centre = Point(0,0), radius=0.0):
-        Point.__init__(self, centre.x,centre.y)
-        self.radius = radius
-        self.area = math.pi * radius ** 2  # redundant but lecturer asked for it
+    def __init__(self, **keywords): # , centre=Point(0,0), radius=0.0
+        #super(Disk, self).__init__()    # default Point(0,0) get done in Point class
+        if "centre" in keywords:
+            super(Disk, self).__init__(x=keywords["centre"].x,y=keywords["centre"].y)   # centre
+        else:
+            super(Disk, self).__init__()  # default
+
+        if "radius" in keywords:
+            self.radius = keywords["radius"]  # radius
+        else:
+            self.radius = 0  # radius
+        self.area = math.pi * self.radius ** 2  # redundant but lecturer asked for it
         # it should be a function but he wants disk.area not disk.area()
 
     def __repr__(self):
-        return 'Disk(' + super().__repr__() + ', {:.2f})'.format(self.area)
+        return 'Disk(' + super().__repr__() + ', {:.2f})'.format(self.radius)
 
 
     def change_radius(self, radius):
@@ -73,7 +76,10 @@ class Disk(Point):
         # get disks centers
         # calculate the distance between the centers
         # use super classes method, I don't know if inherits the method
-        distance1 = self.get_distance_between(self, disk)
+        #distance1 = self.get_distance_between(self, disk)
+        #def baz(self, arg):
+        #return super(Foo, self).baz(arg)
+        distance1 = super(Disk,self).get_distance_between(disk)     # use parent method
         # calculate the radiuses
         # add the radiuses
         # I made the radius a class property instead of area coz area is found with radius mostly,
@@ -89,18 +95,19 @@ class Disk(Point):
     #def area(self):
     #    return self.radius ** 2 * math.pi
 
-
-    # I'm guessing make disks make the same centre
+    # TODO fix this function
+    # creates a bigger disk from the smaller two
     def absorb(self, disk):
         # find the distance between the two centre points
-        distance = self.get_distance_between(self, disk)
+        distance = super(Disk,self).get_distance_between(disk) + self.radius + disk.radius # I should make this a function
         # add the two radi to the distance
-        distance += self.radius + disk.radius
+        #distance += self.radius + disk.radius
         # halve that
-        new_area = math.pi * (distance/2 ** 2) # had to repeat :(
+        print("distance: ", distance)
+        radius_local = distance/2
         # eat ice-cream
-        centre = self.get_half_way(self, disk)
-        return Disk(centre, new_area)
+        centre_local = super(Disk,self).get_half_way(disk) # TODO I need to scale this based on the radius, methinks
+        return Disk(centre=centre_local, radius=radius_local)
 
 
 
@@ -110,10 +117,10 @@ test = False
 
 
 # My tests
-centre = Point(0,0)
-point_1 = Disk(centre,2)
-point_1
-centre
+#centre = Point(0,0)
+#point_1 = Disk(centre,2)
+#point_1
+#centre
 
 # There tests
 if test == True:
@@ -134,9 +141,10 @@ if test == True:
     #True
     disk_2.intersects(disk_1)
     #True
+    # TODO up to here
     disk_3 = disk_1.absorb(disk_2)
     disk_3
-    #Disk(Point(3.00, 0.00), 4.00)
+    #Disk(Point(3.00, 0.00), 4.00)  # TODO should fix got  Disk(Point(-1.50, 0.00), 3.50)
     disk_1.change_radius(2)
     disk_1.area
     #12.566370614359172
@@ -146,7 +154,7 @@ if test == True:
     disk_2
     #Disk(Point(3.00, 0.00), 4.00)
     disk_3
-    #Disk(Point(2.50, 0.00), 4.50)
+    #Disk(Point(2.50, 0.00), 4.50) # TODO Disk(Point(-1.50, 0.00), 4.50)
     disk_4 = Disk(centre = Point(-4, 0), radius = 2)
     disk_4.intersects(disk_1)
     #True
