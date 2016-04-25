@@ -15,19 +15,18 @@ import math
 
 
 class Point:
-    def __init__(self, x=0, y=0):
+    def __init__(self, x=0.0, y=0.0):
         self.x = x
         self.y = y
 
     def __repr__(self):
         return 'Point({:.2f}, {:.2f})'.format(self.x, self.y)
 
-
     def x_distance(self,point):
-        return self.x - point.x
+        return point.x - self.x
 
     def y_distance(self,point):
-        return self.y - point.y
+        return point.y - self.y
 
     def get_distance_between(self, point):
         distance = math.sqrt(self.x_distance(point)**2 + self.y_distance(point)**2)
@@ -38,8 +37,8 @@ class Point:
         y_distance = self.y_distance(point)/2
         # add distance to point but in the right direction
         # get the min point
-        _x = min(point.x,self.x)+x_distance
-        _y = min(point.y,self.y)+y_distance
+        _x = min(point.x,self.x)+math.fabs(x_distance)
+        _y = min(point.y,self.y)+math.fabs(y_distance)
         return Point(_x,_y)
 
 
@@ -58,13 +57,12 @@ class Disk(Point):
         if "radius" in keywords:
             self.radius = keywords["radius"]  # radius
         else:
-            self.radius = 0  # radius
+            self.radius = 0.0  # radius
         self.area = math.pi * self.radius ** 2  # redundant but lecturer asked for it
         # it should be a function but he wants disk.area not disk.area()
 
     def __repr__(self):
         return 'Disk(' + super().__repr__() + ', {:.2f})'.format(self.radius)
-
 
     def change_radius(self, radius):
         self.radius = radius
@@ -92,8 +90,62 @@ class Disk(Point):
             bool = True
         return bool
 
-    #def area(self):
-    #    return self.radius ** 2 * math.pi
+    # overriding
+    # returns modified half way point between two disks
+    def get_half_way(self,disk):
+        x_distance = super(Disk,self).x_distance(disk)
+        y_distance = super(Disk,self).y_distance(disk)
+        # add distance to point but in the right direction
+        # get the min point
+        # self before disk
+        # make sure to know which points are which
+        if x_distance > 0:  # self is x1
+            point_1 = Point(self.x,self.y)
+            point_2 = Point(disk.x,disk.y)
+            rad_1 = self.radius
+            rad_2 = disk.radius
+        else: # disk is x1
+            point_1 = Point(disk.x,disk.y)
+            point_2 = Point(self.x,self.y)
+            rad_1 = disk.radius
+            rad_2 = self.radius
+        #print("Starting x distance: ", x_distance,"y distance: ",y_distance)
+        #print("Starting points: ", point_1,"  2: ",point_2)
+
+        # in case of big circles
+        if math.sqrt(x_distance**2 + y_distance**2) + rad_1 < rad_2:
+            rad_1 += rad_2 - math.sqrt(x_distance**2 + y_distance**2)
+        elif rad_1 > math.sqrt(x_distance**2 + y_distance**2) + rad_2:
+            rad_2 += rad_1 - math.sqrt(x_distance**2 + y_distance**2)
+
+        # avoid divide by 0
+        if x_distance == 0:
+            if y_distance > 0:
+                rads = math.pi/2 # up
+            else:
+                rads = - math.pi/2  # down
+        else:
+            grad = y_distance/x_distance
+            rads=math.atan(grad) # in radians
+        # on radius points
+        x_1 = - math.cos(rads) * rad_1 + point_1.x
+        x_2 = math.cos(rads) * rad_2 + point_2.x
+        y_1 = - math.sin(rads) * rad_1 + point_1.y
+        y_2 = math.sin(rads) * rad_2 + point_2.y
+        # re-use points
+        point_1 = Point(x_1,y_1)
+        point_2 = Point(x_2,y_2)
+
+        x_distance = point_1.x_distance(point_2)
+        y_distance = point_1.y_distance(point_2)
+        #print("Final x distance: ", x_distance,"y distance: ",y_distance)
+        #print("Finishing points: ", point_1,"  2: ",point_2)
+
+        _x = min(point_1.x,point_2.x)+math.fabs(x_distance)/2
+        _y = min(point_1.y,point_2.y)+math.fabs(y_distance)/2
+        return Point(_x,_y)
+
+
 
     # TODO fix this function
     # creates a bigger disk from the smaller two
@@ -103,76 +155,11 @@ class Disk(Point):
         # add the two radi to the distance
         #distance += self.radius + disk.radius
         # halve that
-        print("distance: ", distance)
-        radius_local = distance/2
+        #print("distance: ", distance) # correct??s
+        radius_local = distance/2 # should be right
+        if radius_local < max(self.radius,disk.radius):
+            radius_local = max(self.radius,disk.radius)
         # eat ice-cream
-        centre_local = super(Disk,self).get_half_way(disk) # TODO I need to scale this based on the radius, methinks
+        centre_local = self.get_half_way(disk)
         return Disk(centre=centre_local, radius=radius_local)
 
-
-
-
-test = False
-
-
-
-# My tests
-#centre = Point(0,0)
-#point_1 = Disk(centre,2)
-#point_1
-#centre
-
-# There tests
-if test == True:
-    #>>> from quiz_6 import *
-    disk_1 = Disk()
-    disk_1
-    #Disk(Point(0.00, 0.00), 0.00)
-    disk_1.area
-    #0.0
-    disk_2 = Disk(Point(3, 0), 4)
-    #Traceback (most recent call last):
-    #  File "<stdin>", line 1, in <module>
-    #TypeError: __init__() takes 1 positional argument but 3 were given
-    disk_2 = Disk(centre = Point(3, 0), radius = 4)
-    disk_2.area
-    #50.26548245743669
-    disk_1.intersects(disk_2)
-    #True
-    disk_2.intersects(disk_1)
-    #True
-    # TODO up to here
-    disk_3 = disk_1.absorb(disk_2)
-    disk_3
-    #Disk(Point(3.00, 0.00), 4.00)  # TODO should fix got  Disk(Point(-1.50, 0.00), 3.50)
-    disk_1.change_radius(2)
-    disk_1.area
-    #12.566370614359172
-    disk_3 = disk_1.absorb(disk_2)
-    disk_1
-    #Disk(Point(0.00, 0.00), 2.00)
-    disk_2
-    #Disk(Point(3.00, 0.00), 4.00)
-    disk_3
-    #Disk(Point(2.50, 0.00), 4.50) # TODO Disk(Point(-1.50, 0.00), 4.50)
-    disk_4 = Disk(centre = Point(-4, 0), radius = 2)
-    disk_4.intersects(disk_1)
-    #True
-    disk_5 = disk_4.absorb(disk_1)
-    disk_5
-    #Disk(Point(-2.00, 0.00), 4.00)
-    disk_5.change_radius(5)
-    disk_5
-    #Disk(Point(-2.00, 0.00), 5.00)
-    disk_6 = Disk(centre = Point(1, 2), radius = 6)
-    disk_7 = disk_5.absorb(disk_6)
-    disk_7
-    #Disk(Point(-0.08, 1.28), 7.30)
-    disk_7.area
-    #167.54280759052247
-    disk_8 = Disk()
-    disk_8
-    #Disk(Point(0.00, 0.00), 0.00)
-    disk_8.change_radius(7)
-    disk_8.absorb(disk_7)
-    #Disk(Point(-0.05, 0.79), 7.79)
