@@ -22,11 +22,12 @@ class Tangram():
 
 
 # return true if valid pieces
-def are_valid(coloured_pieces):
-    for piece in coloured_pieces:
+def are_valid(pieces):
+    for piece in pieces:
         if not(piece.check_angle()) or not(piece.check_sides()):
             return False
     return True
+
 
 # return pieces ( a list of pieces), a piece is a list of points
 def available_coloured_pieces(file):
@@ -56,16 +57,22 @@ class Point:
         self.y = y
 
     # get true bearing angle from two points
-    def get_angle(self,point):
+    def get_bearing(self,point):
         # get gradient
-        # TODO do maths for this part
         angle = math.atan2((point.y - self.y),(point.x - self.x))
-        angle = 90 - angle
+        # return between pi and -pi from the horizontal
+        if angle < 0:
+            angle = self.change_angle_range(angle)
+        angle = 90 - angle # make from the vertical axis
         return angle
+
+    # static method
+    def change_angle_range(angle):
+            return 2*math.fab(angle)
 
 
 # a group of points
-class Piece():
+class Piece:
     def __init__(self,point_list):
         self.point_list = point_list
 
@@ -75,16 +82,47 @@ class Piece():
         size = len(self.point_list)
         i=0
         while i <= size:
-            if i == size: # last
-                angles.append(self.point_list[i].get_angle(self.point_list[0]))
+            if i == size: # last point
+                angles.append(self.point_list[i].get_bearing(self.point_list[0]))
             else:
-                angles.append(self.point_list[i].get_angle(self.point_list[i+1]))
+                angles.append(self.point_list[i].get_bearing(self.point_list[i+1]))
+            diff = [right-left for left, right in zip(angles, angles[1:]+angles[:1])] # got from question I asked on stack
+            if diff[-2]>0: # could look at a ternary operator here
+                diff[-1] = diff[-1] + 360
+            else:
+                diff[-1] = diff[-1] - 360
+            # TODO need to input angles from start point into clockwise_angle_check
+            # diff is only good for adjacent angle check
+        return self.clockwise_angle_check(diff) and self.difference_in_adjacent_angle_check(diff)
 
-        # get a list of true bearings
-        # check if ascending or descending
-        # substraction previous angle
-        # all should be below 180
+    # static method
+    # checks if angles are ascending or descending
+    def clockwise_angle_check(diff):
+        # static method - I did this so I didn't have to add 'self' to the args
+        def times_negative_one(val):
+            return val * -1
+
+        def if_ascending(diff):
+            # TODO do logic stuff checking if the angle is ascending
+            return True
+
+        # make ascending if descending
+        # should remove else statement
+        if diff[0]<0:
+            return if_ascending(list(map(times_negative_one,diff)))
+        else:
+            return if_ascending(diff)
+
+
+
+
+
+
+    # static method
+    # checks if angles are not different by 180 degrees (convex)
+    def difference_in_adjacent_angle_check(angles):
         return True
+
 
     def check_sides(self):
         if len(self.point_list)<3:
