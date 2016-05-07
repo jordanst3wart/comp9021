@@ -1,11 +1,10 @@
 # by Jordan Stewart
-# Worse is better
 
 import re
 import math
-
 import unittest
 
+# Questions
 # 1. is input valid - done needs testing
 # 2. two files are identical - done needs testing
 # 3. are a solution to a tangram puzzle
@@ -13,10 +12,6 @@ import unittest
 
 class Tangram():
     pass
-
-
-# available_coloured_pieces(file)
-
 
 # open for xml types might not be defined
 # opens the file, I might not need to write this
@@ -40,27 +35,26 @@ def is_solution(tangram, shape):
     # need piece calculate area by breaking into triangles
     # implement that for a list of pieces with map
     pass
-
     #options??
     # BFS
-
     # a star search
 
-
-
-
-
 # return true if valid pieces
+# TODO up to this
 def are_valid(pieces):
     bool = True
     for piece in pieces:
-        print(piece)
-        if not(piece.check_angles() and piece.check_sides()):
+        #print("angle check: ", piece.check_angles(),"  side check: ", piece.check_sides())
+        if piece.check_angles() and piece.check_sides():
+            #print("Not Legit : ",piece)
+            bool = True
+        else:
             bool = False
+            #print("Legit : ", piece)
     return bool
 
-
 # return pieces ( a list of pieces), a piece is a list of points
+# I would like to make this a class or something, it feels to big to be a function
 def available_coloured_pieces(file):
     def is_number(s):
         try:
@@ -74,40 +68,44 @@ def available_coloured_pieces(file):
         for i in range(0, len(vals)-1,2): #vals: #range(0, len(l)):
             point_list.append(Point(vals[i],vals[i+1]))
         return point_list
-    pieces = []
-    piece = []
-    temp = []
-    piece_list = []
-    for line in file:
-        line = parse_xml(line)
-        if line is not None:
-            for val in line:
-                if is_number(val):
-                    piece.append(val)
-            pieces.append(piece)
-            piece = []
-    for piece in pieces:
-        temp.append(create_point_list(piece))
-    for piece in temp:
-        piece_list.append(Piece(piece))
-    return piece_list
 
-# input could be file but the file should be iterateable
-# returns piece, a list of points
-def parse_xml(line):
-    #print(line)
-    if "svg" in line or len(line)<2:
-        return None   # might return something weird
-    #print(line)
-    vals = []
-    line=re.split('\"',line)
-    line=line[1].split()
-    for string in line:
-        if string:
-            vals.append(string)
-            #piece.append(Point(string,string.next)) # might not remove from que
-            #print("full string:  ", string)
-    return vals
+    # return a list of values
+    def parse_xml(line):
+        vals = []
+        if "svg" in line or len(line)<2:
+            return None
+        line=re.split('\"',line)
+        line=line[1].split()
+        for string in line:
+            if string:
+                vals.append(string)
+        return vals
+
+    def get_values(file):
+        # I should break this down into functions
+        pieces = []
+        piece = []
+        for line in file:
+            line = parse_xml(line)
+            if line is not None:
+                for val in line:
+                    if is_number(val):
+                        piece.append(val)
+                pieces.append(piece)
+                piece = []
+        return pieces
+
+    def create_pieces(values):
+        temp = []
+        for value in values:
+            temp.append(Piece(create_point_list(value)))
+        return temp
+
+    values = get_values(file)
+    pieces = create_pieces(values)
+    return pieces
+
+
 
 
 class Point:
@@ -121,20 +119,25 @@ class Point:
     def __str__(self):
         return "Point({},{})".format(self.x,self.y)
 
-    # get true bearing angle from two points
-    def get_bearing(self,point):
-        def to_degree(angle):
-            return angle*180/math.pi
-            # static method, converts -pi to 2pi
-        def change_angle_range(angle):
-            return 2*abs(angle)
+    # get angle from two points from the x horizontal
+    def get_angle(self,point):
         # get gradient
         angle = math.atan2((point.y - self.y),(point.x - self.x))
         # return between pi and -pi from the horizontal
         if angle < 0:
-            angle = change_angle_range(angle)
-        angle = 90 - to_degree(angle) # make from the vertical axis
-        return angle
+            angle = self.change_angle_range(angle)
+        # retrun between 0 and 2 pi
+        return self.to_degree(angle) # change to degrees
+
+    @staticmethod
+    def change_angle_range(angle):
+        return 2*math.pi + angle
+
+    # static method, converts -pi to 2pi
+    @staticmethod
+    def to_degree(angle):
+        return angle*180/math.pi
+
 
     # overriding equals for Point class
     def __eq__(self, other):
@@ -161,6 +164,7 @@ class Point:
 class Piece:
     def __init__(self,point_list):
         self.point_list = point_list
+        self.remap = True
 
     # should work?
     def __eq__(self, other):
@@ -182,46 +186,55 @@ class Piece:
         return "Piece({})".format(self.point_list)
 
     # convex and clockwise angles
+    # TODO up to here debugging this
     def check_angles(self):
         angles = []
-        size = len(self.point_list)
+        size = len(self.point_list)-1
         i=0
         diff = []
         while i <= size:
             if i == size: # last point
-                angles.append(self.point_list[i].get_bearing(self.point_list[0]))
+                angles.append(self.point_list[i].get_angle(self.point_list[0]))
             else:
-                angles.append(self.point_list[i].get_bearing(self.point_list[i+1]))
-            diff = [right-left for left, right in zip(angles, angles[1:]+angles[:1])] # got from question I asked on stack
-            if diff[0]>0: # if the list if positive
-                diff[-1] += + 360
-            else:
-                diff[-1] += - 360
-
-            if len(diff)<3:
-                print(diff)
+                angles.append(self.point_list[i].get_angle(self.point_list[i+1]))
             i += 1
-            # TODO need to input angles from start point into clockwise_angle_check
-            # diff is only good for adjacent angle check
-        return self.clockwise_angle_check(diff) and self.difference_in_adjacent_angle_check(diff)
 
-    # static method
+        diff = [self.polar_diff(right,left) for left, right in zip(angles, angles[1:]+angles[:1])] # got from question I asked on stack
+        #print(angles)
+        #print(diff)
+        #print(self,"  angles :", angles," diff: ",diff)
+        #print(self, diff,"   clockwise check: ",self.clockwise_angle_check(diff), "adjacent angle check: ", self.difference_in_adjacent_angle_check(angles,diff))
+        #print(self, diff,"   clockwise check: ",self.clockwise_angle_check(diff))
+        return self.clockwise_angle_check(diff) and self.difference_in_adjacent_angle_check(angles,diff)
+
+    def polar_diff(self,right,left):
+        val = right-left
+        temp = right-left
+        if abs(val) > 180 and self.remap:
+            if left<180:
+                val = right - left - 360
+            else:
+                val = right - left + 360
+            self.remap = False
+            #val = val + 1000
+        #print("initial diff:", temp, "final diff: ", val)
+        return val
+
     # checks if angles are ascending or descending to make sure they are defined clockwise or anti-clockwise
-    def clockwise_angle_check(diff):
+    def clockwise_angle_check(self,diff):
         # static method - I did this so I didn't have to add 'self' to the args
-        def times_negative_one(val):
-            return val * -1
-
-        def if_ascending(diff):
-            return sorted(diff) == diff
-
         bool = False
         if diff[0] < 0:
-            bool = if_ascending(list(map(times_negative_one,diff)))
+            diff = list(map(self.times_negative_one,diff))
+            #print("diff reverse: ",list(map(self.times_negative_one,diff)))
+            bool = all(angle > 0 for angle in diff)
         else:
-            bool = if_ascending(diff)
-
+            bool = all(angle > 0 for angle in diff)
         return bool
+
+    @staticmethod
+    def times_negative_one(val):
+        return val * -1
 
     def check_sides(self):
         if len(self.point_list)<3:
@@ -229,8 +242,10 @@ class Piece:
         else:
             return True
 
+
     # check if all angles are below 180
-    def difference_in_adjacent_angle_check(diff):
+    @staticmethod
+    def difference_in_adjacent_angle_check(angles,diff):
         bool = True
         for angle in diff:
             if angle > 180:
@@ -238,38 +253,47 @@ class Piece:
         return bool
 
 
-
+# done
 class Q1(unittest.TestCase):
 
     def test_are_valid(self):
         file = open('pieces_A.xml')
         coloured_pieces = available_coloured_pieces(file)
         self.assertTrue(are_valid(coloured_pieces))
-        #file = open('pieces_AA.xml')
-        #coloured_pieces = available_coloured_pieces(file)
-        #self.assertTrue(are_valid(coloured_pieces))
-        #file = open('incorrect_pieces_2.xml')
+        file.close()
+        file = open('pieces_AA.xml')
         coloured_pieces = available_coloured_pieces(file)
-        #self.assertFalse(are_valid(coloured_pieces))
-        #file = open('incorrect_pieces_3.xml')
+        self.assertTrue(are_valid(coloured_pieces))
+        file.close()
+        file = open('incorrect_pieces_1.xml')
         coloured_pieces = available_coloured_pieces(file)
-        #self.assertFalse(are_valid(coloured_pieces))
-        #file = open('incorrect_pieces_4.xml')
+        self.assertFalse(are_valid(coloured_pieces))
+        file.close()
+        file = open('incorrect_pieces_2.xml')
         coloured_pieces = available_coloured_pieces(file)
-        #self.assertFalse(are_valid(coloured_pieces))
+        self.assertFalse(are_valid(coloured_pieces))
+        file.close()
+        file = open('incorrect_pieces_3.xml')
+        coloured_pieces = available_coloured_pieces(file)
+        self.assertFalse(are_valid(coloured_pieces)) # doesn't work :(
+        file.close()
+        file = open('incorrect_pieces_4.xml')
+        coloured_pieces = available_coloured_pieces(file)
+        self.assertFalse(are_valid(coloured_pieces)) # doesn't work :(
+        file.close()
 
 
 
 def main():
-    file = open('pieces_A.xml')
+    file = open('incorrect_pieces_3.xml')
     coloured_pieces = available_coloured_pieces(file)
     are_valid(coloured_pieces)
 
 
 # if is run directly
 if __name__ == '__main__':
-    #unittest.main()
-    main()
+    unittest.main()
+    #main()
 
 
 
