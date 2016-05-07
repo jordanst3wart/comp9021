@@ -19,7 +19,20 @@ class Tangram():
 
 # maybe? if equals works for list of the class
 def are_identical_sets_of_coloured_pieces(pieces,other_pieces):
-    return pieces == other_pieces
+    bool = False
+
+    for piece in pieces:
+        for other in other_pieces:
+            if piece == other:
+                bool = True
+        if bool == False:
+            return False
+        bool = False
+    return True
+
+    #return pieces == other_pieces
+    # TODO compare the diff in angles and a scale ie. area?
+    # TODO make an area cal
     #bool = True
     #for piece in pieces:
     #    for other_piece in other_pieces:
@@ -165,19 +178,30 @@ class Piece:
     def __init__(self,point_list):
         self.point_list = point_list
         self.remap = True
+        self.angles = self.create_angles()
+        self.diff = self.create_diff()
+        # self.area
 
     # should work?
     def __eq__(self, other):
         #return self.point_list == other.point_list
         if type(other) is type(self):
-            return self.__dict__ == other.__dict__
+            print("This: ",sorted(self.diff), "That:",sorted(other.diff))
+            bool = sorted(self.diff) == sorted(other.diff)
+            if bool == True:
+                print("returned True!!!!")
+            return bool
         return False
+        # TODO this make it compare diff angle and area
+        # will need to sort the angles
 
     def __ne__(self, other):
+        return not(self.__eq__(other))
         #return self.point_list != other.point_list
-        if type(other) is type(self):
-            return not(self.__dict__ == other.__dict__)
-        return True
+        #if type(other) is type(self):
+        #    return not(self.__dict__ == other.__dict__)
+        #return True
+        # TODO this make it compare diff angle and area
 
     def __repr__(self):
         return "Piece({})".format(self.point_list)
@@ -185,9 +209,7 @@ class Piece:
     def __str__(self):
         return "Piece({})".format(self.point_list)
 
-    # convex and clockwise angles
-    # TODO up to here debugging this
-    def check_angles(self):
+    def create_angles(self):
         angles = []
         size = len(self.point_list)-1
         i=0
@@ -198,14 +220,22 @@ class Piece:
             else:
                 angles.append(self.point_list[i].get_angle(self.point_list[i+1]))
             i += 1
+        return angles
 
-        diff = [self.polar_diff(right,left) for left, right in zip(angles, angles[1:]+angles[:1])] # got from question I asked on stack
-        #print(angles)
-        #print(diff)
+    def create_diff(self):
+        diff = [self.polar_diff(right,left) for left, right in zip(self.angles, self.angles[1:]+self.angles[:1])] # got from question I asked on stack
+        if all(angle < 0 for angle in diff):
+            diff = list(map(self.times_negative_one,diff))
+        return diff
+
+
+    # convex and clockwise angles
+    # TODO up to here debugging this
+    def check_angles(self):
         #print(self,"  angles :", angles," diff: ",diff)
         #print(self, diff,"   clockwise check: ",self.clockwise_angle_check(diff), "adjacent angle check: ", self.difference_in_adjacent_angle_check(angles,diff))
         #print(self, diff,"   clockwise check: ",self.clockwise_angle_check(diff))
-        return self.clockwise_angle_check(diff) and self.difference_in_adjacent_angle_check(angles,diff)
+        return self.clockwise_angle_check(self.diff) and self.difference_in_adjacent_angle_check(self.angles,self.diff)
 
     def polar_diff(self,right,left):
         val = right-left
@@ -282,18 +312,47 @@ class Q1(unittest.TestCase):
         self.assertFalse(are_valid(coloured_pieces)) # doesn't work :(
         file.close()
 
+class Q2(unittest.TestCase):
+
+        def test_are_identical_sets_of_coloured_pieces(self):
+            file = open('pieces_A.xml')
+            coloured_pieces_1 = available_coloured_pieces(file)
+            file.close()
+            file = open('pieces_AA.xml')
+            coloured_pieces_2 = available_coloured_pieces(file)
+            file.close()
+            self.assertTrue(are_identical_sets_of_coloured_pieces(coloured_pieces_1,coloured_pieces_2))
+
+            file = open('shape_A_1.xml')
+            coloured_pieces_2 = available_coloured_pieces(file)
+            file.close()
+            self.assertFalse(are_identical_sets_of_coloured_pieces(coloured_pieces_1,coloured_pieces_2))
 
 
-def main():
+
+
+def mainQ1():
     file = open('incorrect_pieces_3.xml')
     coloured_pieces = available_coloured_pieces(file)
     are_valid(coloured_pieces)
+
+def mainQ2():
+    file = open('pieces_A.xml')
+    coloured_pieces_1 = available_coloured_pieces(file)
+    file.close()
+    file = open('pieces_AA.xml')
+    coloured_pieces_2 = available_coloured_pieces(file)
+    file.close()
+    print(coloured_pieces_1[0].diff)
+    print(coloured_pieces_2[0].diff)
+    print(are_identical_sets_of_coloured_pieces(coloured_pieces_1,coloured_pieces_2))
 
 
 # if is run directly
 if __name__ == '__main__':
     unittest.main()
-    #main()
+    #mainQ1()
+    #mainQ2()
 
 
 
