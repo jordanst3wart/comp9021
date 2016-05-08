@@ -3,10 +3,11 @@
 import re
 import math
 import unittest
+import itertools
 
 # Questions
-# 1. is input valid - done needs testing
-# 2. two files are identical - done needs testing
+# 1. is input valid - done
+# 2. two files are identical - done
 # 3. are a solution to a tangram puzzle
 
 
@@ -20,11 +21,11 @@ class Tangram():
 # maybe? if equals works for list of the class
 def are_identical_sets_of_coloured_pieces(pieces,other_pieces):
     bool = False
-
     for piece in pieces:
         for other in other_pieces:
             if piece == other:
                 bool = True
+                break
         if bool == False:
             return False
         bool = False
@@ -40,85 +41,140 @@ def are_identical_sets_of_coloured_pieces(pieces,other_pieces):
     #            bool = False
     #return bool
 
+
 #  tiling puzzle
 # http://stackoverflow.com/questions/31097669/a-algorithm-while-solving-sliding-tile-puzzle-executes-for-a-very-long-time
 def is_solution(tangram, shape):
+    area = 0
+    for piece in tangram:
+        area += piece.area
+    print("area shape",shape[0].area, "area T:",area)
+    if shape[0].area != area:
+        return False
+    #else:
+    #    return True # False Positive
+
+    match_me = shape.angles
+    # generate combos, not permutations as order is not important
+    combos = []
+    leng = 1
+    i = 0
+    can_make = False
+
+    # cap at 5?? Hopefully not 5 pieces are put together to make one corner
+    cap = 3
+    # leng might == max number of points
+    while len(tangram) >= leng:
+        combos = generate_combos(tangram, leng, cap)
+        while len(combos) != 0:
+            while len(match_me) >= i:
+                if match_me[i] == sum(combos[0]):
+                    # if angle matched remove it
+                    del match_me[i]
+                i += 1
+
+            if len(match_me) == 0:
+                # break all loops, all angles can be made
+                leng = len(tangram)
+                can_make = True
+            i = 0 # reset counter
+            del combos[0] # remove first combo
+        combos = [] # make sure to reset combos
+        leng += 1
+
+    #if can_make == False:
+    #    return False
+    return can_make
+    #if a combos matches all cases of match_me
+    #    return True
+
+    # TODO calculate area
+    # TODO calculate if angles can be created
+    # if it can't be return False
+    # TODO do angle check
     # shape is one piece in a pieces array
     # if area is not equal then false, quick win?
     # need piece calculate area by breaking into triangles
     # implement that for a list of pieces with map
-    pass
     #options??
     # BFS
     # a star search
+    # generic algorithm
+
+
+def generate_combos(pieces,len,cap):
+    if len > cap:
+        return []
+    li = [item for sub_list in pieces for item in sub_list]
+    li = itertools.combinations(li,len)
+    return li
 
 # return true if valid pieces
 # TODO up to this
 def are_valid(pieces):
     bool = True
     for piece in pieces:
-        #print("angle check: ", piece.check_angles(),"  side check: ", piece.check_sides())
         if piece.check_angles() and piece.check_sides():
-            #print("Not Legit : ",piece)
             bool = True
         else:
             bool = False
-            #print("Legit : ", piece)
     return bool
 
 # return pieces ( a list of pieces), a piece is a list of points
 # I would like to make this a class or something, it feels to big to be a function
 def available_coloured_pieces(file):
-    def is_number(s):
-        try:
-            float(s)
-            return True
-        except ValueError:
-            return False
-
-    def create_point_list(vals):
-        point_list = []
-        for i in range(0, len(vals)-1,2): #vals: #range(0, len(l)):
-            point_list.append(Point(vals[i],vals[i+1]))
-        return point_list
-
-    # return a list of values
-    def parse_xml(line):
-        vals = []
-        if "svg" in line or len(line)<2:
-            return None
-        line=re.split('\"',line)
-        line=line[1].split()
-        for string in line:
-            if string:
-                vals.append(string)
-        return vals
-
-    def get_values(file):
-        # I should break this down into functions
-        pieces = []
-        piece = []
-        for line in file:
-            line = parse_xml(line)
-            if line is not None:
-                for val in line:
-                    if is_number(val):
-                        piece.append(val)
-                pieces.append(piece)
-                piece = []
-        return pieces
-
-    def create_pieces(values):
-        temp = []
-        for value in values:
-            temp.append(Piece(create_point_list(value)))
-        return temp
-
     values = get_values(file)
     pieces = create_pieces(values)
     return pieces
 
 
+def is_number(s):
+    try:
+        float(s)
+        return True
+    except ValueError:
+        return False
+
+
+def create_point_list(vals):
+    point_list = []
+    for i in range(0, len(vals)-1,2): #vals: #range(0, len(l)):
+        point_list.append(Point(vals[i],vals[i+1]))
+    return point_list
+
+
+# return a list of values
+def parse_xml(line):
+    vals = []
+    if "svg" in line or len(line)<2:
+        return None
+    line=re.split('\"',line)
+    line=line[1].split()
+    for string in line:
+        if string:
+            vals.append(string)
+    return vals
+
+
+def get_values(file):
+    pieces = []
+    piece = []
+    for line in file:
+        line = parse_xml(line)
+        if line is not None:
+            for val in line:
+                if is_number(val):
+                    piece.append(val)
+            pieces.append(piece)
+            piece = []
+    return pieces
+
+
+def create_pieces(values):
+    temp = []
+    for value in values:
+        temp.append(Piece(create_point_list(value)))
+    return temp
 
 
 class Point:
@@ -172,6 +228,9 @@ class Point:
             return not(self.__dict__ == other.__dict__)
         return True
 
+    def to_list(self):
+        return [self.x,self.y]
+
 
 # a group of points
 class Piece:
@@ -180,20 +239,23 @@ class Piece:
         self.remap = True
         self.angles = self.create_angles()
         self.diff = self.create_diff()
-        # self.area
+        self.area = self.calculate_area()
 
     # should work?
     def __eq__(self, other):
         #return self.point_list == other.point_list
         if type(other) is type(self):
-            print("This: ",sorted(self.diff), "That:",sorted(other.diff))
-            bool = sorted(self.diff) == sorted(other.diff)
-            if bool == True:
-                print("returned True!!!!")
-            return bool
+            #print("This: ",sorted(self.diff), "That:",sorted(other.diff))
+            return sorted(self.diff) == sorted(other.diff)
         return False
         # TODO this make it compare diff angle and area
         # will need to sort the angles
+
+    def to_list(self):
+        list = []
+        for point in self.point_list:
+            list.append([point.x, point.y])
+        return list
 
     def __ne__(self, other):
         return not(self.__eq__(other))
@@ -208,6 +270,16 @@ class Piece:
 
     def __str__(self):
         return "Piece({})".format(self.point_list)
+
+    # calculate the area of a piece with cross product
+    # http://stackoverflow.com/questions/451426/how-do-i-calculate-the-area-of-a-2d-polygon
+    def calculate_area(self):
+        p = self.to_list()
+        return 0.5 * abs(sum(x0*y1 - x1*y0 for ((x0, y0), (x1, y1)) in self.segments(p)))
+
+    @staticmethod
+    def segments(p):
+        return zip(p, p[1:] + [p[0]])
 
     def create_angles(self):
         angles = []
@@ -227,7 +299,6 @@ class Piece:
         if all(angle < 0 for angle in diff):
             diff = list(map(self.times_negative_one,diff))
         return diff
-
 
     # convex and clockwise angles
     # TODO up to here debugging this
@@ -329,6 +400,21 @@ class Q2(unittest.TestCase):
             self.assertFalse(are_identical_sets_of_coloured_pieces(coloured_pieces_1,coloured_pieces_2))
 
 
+class Q3(unittest.TestCase):
+
+        def test_are_identical_sets_of_coloured_pieces(self):
+            file = open('shape_A_1.xml')
+            shape = available_coloured_pieces(file)
+            file.close()
+            file = open('tangram_A_1_a.xml')
+            tangram = available_coloured_pieces(file)
+            file.close()
+            self.assertTrue(is_solution(tangram, shape))
+            file = open('tangram_A_2_a.xml')
+            tangram = available_coloured_pieces(file)
+            file.close()
+            self.assertFalse(is_solution(tangram, shape))
+
 
 
 def mainQ1():
@@ -347,12 +433,26 @@ def mainQ2():
     print(coloured_pieces_2[0].diff)
     print(are_identical_sets_of_coloured_pieces(coloured_pieces_1,coloured_pieces_2))
 
+def mainQ3():
+    file = open('shape_A_2.xml')
+    shape = available_coloured_pieces(file)
+    file.close()
+    file = open('tangram_A_1_a.xml')
+    tangram = available_coloured_pieces(file)
+    file.close()
+    print(is_solution(tangram, shape))
+    file = open('tangram_A_2_b.xml')
+    tangram = available_coloured_pieces(file)
+    file.close()
+    print(is_solution(tangram, shape))
+
 
 # if is run directly
 if __name__ == '__main__':
-    unittest.main()
+    #unittest.main()
     #mainQ1()
     #mainQ2()
+    mainQ3()
 
 
 
