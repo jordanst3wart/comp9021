@@ -1,4 +1,4 @@
-# by Jordan Stewart
+# by Jordan Stewart z3291315
 
 import re
 import math
@@ -10,15 +10,11 @@ import itertools
 # 2. two files are identical - done
 # 3. are a solution to a tangram puzzle
 
-
-class Tangram():
-    pass
-
 # open for xml types might not be defined
 # opens the file, I might not need to write this
 # def open(’pieces_AA.xml’)
 
-# maybe? if equals works for list of the class
+
 def are_identical_sets_of_coloured_pieces(pieces,other_pieces):
     bool = False
     for piece in pieces:
@@ -31,86 +27,76 @@ def are_identical_sets_of_coloured_pieces(pieces,other_pieces):
         bool = False
     return True
 
-    #return pieces == other_pieces
-    # TODO compare the diff in angles and a scale ie. area?
-    # TODO make an area cal
-    #bool = True
-    #for piece in pieces:
-    #    for other_piece in other_pieces:
-    #        if piece != other_pieces:
-    #            bool = False
-    #return bool
-
-
 #  tiling puzzle
-# http://stackoverflow.com/questions/31097669/a-algorithm-while-solving-sliding-tile-puzzle-executes-for-a-very-long-time
-def is_solution(tangram, shape):
+    #options??
+    # BFS??
+    # a star search??
+    # generic algorithm??
+    # I can't belive he made all the areas the same :(
+def is_solution(pieces, shape):
     area = 0
-    for piece in tangram:
+    for piece in pieces:
         area += piece.area
-    print("area shape",shape[0].area, "area T:",area)
+    if len(shape)!=1: # not 1 shape???
+        return False
     if shape[0].area != area:
         return False
-    #else:
-    #    return True # False Positive
-
-    match_me = shape.angles
-    # generate combos, not permutations as order is not important
-    combos = []
+    #return True
+    match_me = [abs(i) for i in shape[0].diff]
+    #match_me = shape[0].diff   # diff is internal angle
+    #print("angles to match: ",match_me)
     leng = 1
     i = 0
     can_make = False
-
-    # cap at 5?? Hopefully not 5 pieces are put together to make one corner
-    cap = 3
-    # leng might == max number of points
-    while len(tangram) >= leng:
-        combos = generate_combos(tangram, leng, cap)
+    cap = 2  # cap at 5?? Hopefully not 5 pieces are put together to make one corner
+    max_angles = get_max_points(pieces)
+    while leng <= max_angles and not(can_make): #max_angles >= leng:
+    # comparing the number of angles to the leng of combos
+        combos = generate_combos(pieces, leng, cap)
         while len(combos) != 0:
-            while len(match_me) >= i:
+        # checks each combo
+            while len(match_me) > i:
+            # checks each internal angle
+                #print(match_me)
+                #print("length: ",len(match_me),"counter: ",i,"number of combos:", len(combos))
+                #print("combo is: ",combos[0])
                 if match_me[i] == sum(combos[0]):
                     # if angle matched remove it
                     del match_me[i]
-                i += 1
-
+                else:
+                    i += 1
             if len(match_me) == 0:
                 # break all loops, all angles can be made
-                leng = len(tangram)
                 can_make = True
             i = 0 # reset counter
             del combos[0] # remove first combo
-        combos = [] # make sure to reset combos
         leng += 1
 
-    #if can_make == False:
-    #    return False
+    #print("Failed to match: ",match_me)
     return can_make
-    #if a combos matches all cases of match_me
-    #    return True
-
-    # TODO calculate area
-    # TODO calculate if angles can be created
-    # if it can't be return False
-    # TODO do angle check
-    # shape is one piece in a pieces array
-    # if area is not equal then false, quick win?
-    # need piece calculate area by breaking into triangles
-    # implement that for a list of pieces with map
-    #options??
-    # BFS
-    # a star search
-    # generic algorithm
 
 
 def generate_combos(pieces,len,cap):
     if len > cap:
         return []
-    li = [item for sub_list in pieces for item in sub_list]
-    li = itertools.combinations(li,len)
+    li = []
+    for piece in pieces:
+        for item in piece.diff:
+            li.append(item)
+    li = list(itertools.combinations(li,len))
     return li
 
+
+def get_max_points(pieces):
+    max_val = 0
+    for piece in pieces:
+        temp = len(piece.angles)
+        if temp > max_val:
+            max_val = temp
+    return max_val
+
+
 # return true if valid pieces
-# TODO up to this
 def are_valid(pieces):
     bool = True
     for piece in pieces:
@@ -119,6 +105,7 @@ def are_valid(pieces):
         else:
             bool = False
     return bool
+
 
 # return pieces ( a list of pieces), a piece is a list of points
 # I would like to make this a class or something, it feels to big to be a function
@@ -448,11 +435,11 @@ def mainQ3():
 
 
 # if is run directly
-if __name__ == '__main__':
+#if __name__ == '__main__':
     #unittest.main()
     #mainQ1()
     #mainQ2()
-    mainQ3()
+    #mainQ3()
 
 
 
