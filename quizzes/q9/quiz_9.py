@@ -7,43 +7,56 @@
 # Written by Jordan Stewart and Eric Martin for COMP9021
 
 import sys
+import copy
 from random import seed, randrange
 from binary_tree import *
 
 
 def sums_on_longest_branches(tree):
-    return sum_branch((highest_branches(tree,tree.height())))
+    return sum_branch((highest_branches(tree, tree.height())))
 
 
 # vals is a list of lists for the highest branches
 def sum_branch(vals):
     # sum unique vals, sum all vals
-    print(vals)
     return sum(set(vals)), sum(vals)
 
 
 # returns the highest branches as a list
-def highest_branches(tree,height):
-    # if nonething is here
+def highest_branches(tree, height):
     if tree.value is None:
         return [0]
-    val = [tree.value]
-    # no elements below
+
+
     if height == 0:
-        return val
+        return [tree.value] # no elements below
+    L1 = [tree.value]
+    L2 = [tree.value]
     # do I deal with the current value if height != 0
-    val = branch(val,tree.left_node,height-1)  # I think i might need to pass it val to get it in the branch
-    val.append(branch(val,tree.right_node,height-1))
+    L1.append(branch([tree.value], tree.left_node, height - 1))  # I think i might need to pass it val to get it in the branch
+    L2.append(branch([tree.value], tree.right_node, height - 1))
+    if branch([tree.value], tree.left_node, height - 1)==0:
+        L1 = []
+    if branch([tree.value], tree.right_node, height - 1)==0:
+        L2 = []
+
     # if a valid branch it should append it
+    print("L1: ", L1," L2: ", L2)
+    val = L1 + L2
     val = flatten(val)
+    print("after flatten val: ", val)
     return val
 
 
 # returns a list
-def branch(val,tree,height):
+def branch(val, tree, height):
     if tree.height() == height:
-        return val.append(highest_branches(tree,height)) # appends val if the sub tree is valid
-    return [0] # end of the line
+        temp = highest_branches(tree, height)  # appends val if the sub tree is valid
+        if temp == [0]:
+            return 0
+        else:
+            return temp
+    return 0  # end of the line, delete branch on zero return
 
 
 # flatten lists
